@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { registerUser } from '../apiservice';  // Import the registerUser function
+import { registerUser } from '../apiService';  // Import the registerUser function
 
 const Register = () => {
   const [name, setName] = useState('');
