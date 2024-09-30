@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { registerUser } from '../apiservice';  // Import the registerUser function
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -20,13 +20,7 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post('https://swe-project-liard.vercel.app/register', {
-        name,
-        email,
-        password,
-        phone_number: phoneNumber,
-      });
-
+      const response = await registerUser(name, email, password, phoneNumber);  // Call the API service function
       if (response.status === 201) {
         setSuccess('Registration successful!');
         setName('');
@@ -35,7 +29,11 @@ const Register = () => {
         setPhoneNumber('');
       }
     } catch (error) {
-      setError('Registration failed. Please try again.');
+      if (error.response && error.response.data && error.response.data.error) {
+        setError(`Registration failed: ${error.response.data.error}`);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     }
   };
 
@@ -51,6 +49,7 @@ const Register = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           style={styles.input}
+          required
         />
         <input
           type="email"
@@ -58,6 +57,7 @@ const Register = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={styles.input}
+          required
         />
         <input
           type="password"
@@ -65,6 +65,7 @@ const Register = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={styles.input}
+          required
         />
         <input
           type="text"
