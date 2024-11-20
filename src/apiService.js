@@ -37,7 +37,7 @@ export const registerBuyer = async (name, email, phoneNumber, password, delivery
 
 export const loginUser = async (email, password) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/login`, {
+    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
       email,
       password,
     });

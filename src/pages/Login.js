@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '../apiService';
-import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(''); // Clear any previous error
 
     if (!email || !password) {
       setError('Please fill out all required fields.');
@@ -18,11 +19,19 @@ const Login = () => {
 
     try {
       const response = await loginUser(email, password);
+
       if (response.status === 200) {
-        // Handle successful login (e.g., redirect to homepage)
+        const token = response.data.token;
+        localStorage.setItem('token', token); // Store the token in localStorage
+        navigate('/dashboard'); // Redirect to the dashboard
       }
     } catch (error) {
-      setError('Login failed. Please try again.');
+      if (error.response) {
+        // Display error message from the backend
+        setError(error.response.data.error || 'Login failed. Please try again.');
+      } else {
+        setError('Network error. Please try again later.');
+      }
     }
   };
 
@@ -50,7 +59,10 @@ const Login = () => {
         <button type="submit" style={styles.button}>Login</button>
       </form>
       <p style={styles.registerText}>
-        Don't have an account? <Link to="/register" style={styles.registerLink}>Register here</Link>
+        Don't have an account?{' '}
+        <Link to="/register" style={styles.registerLink}>
+          Register here
+        </Link>
       </p>
     </div>
   );
