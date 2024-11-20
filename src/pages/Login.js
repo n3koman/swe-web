@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '../apiService';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -10,7 +10,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Clear any previous error
+    setError('');
 
     if (!email || !password) {
       setError('Please fill out all required fields.');
@@ -19,18 +19,16 @@ const Login = () => {
 
     try {
       const response = await loginUser(email, password);
-
       if (response.status === 200) {
-        const token = response.data.token;
-        localStorage.setItem('token', token); // Store the token in localStorage
-        navigate('/dashboard'); // Redirect to the dashboard
+        localStorage.setItem('token', response.data.token); // Store JWT token
+        navigate('/dashboard'); // Redirect to dashboard
       }
     } catch (error) {
-      if (error.response) {
-        // Display error message from the backend
-        setError(error.response.data.error || 'Login failed. Please try again.');
+      console.error('Login error:', error);
+      if (error.response && error.response.data) {
+        setError(error.response.data.message || 'Login failed. Please try again.');
       } else {
-        setError('Network error. Please try again later.');
+        setError('An unexpected error occurred.');
       }
     }
   };
@@ -59,10 +57,7 @@ const Login = () => {
         <button type="submit" style={styles.button}>Login</button>
       </form>
       <p style={styles.registerText}>
-        Don't have an account?{' '}
-        <Link to="/register" style={styles.registerLink}>
-          Register here
-        </Link>
+        Don't have an account? <Link to="/register" style={styles.registerLink}>Register here</Link>
       </p>
     </div>
   );
