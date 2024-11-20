@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import FarmerProfileModal from './FarmerProfileModal';
 
 const Dashboard = () => {
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -185,7 +187,22 @@ const Dashboard = () => {
   const renderFarmerDashboard = (data) => (
     <>
       <div style={styles.card}>
-        <h2>Farm Info</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>Farm Info</h2>
+          <button
+            onClick={() => setIsProfileModalOpen(true)}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#4CAF50',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Manage Profile
+          </button>
+        </div>
         <p>
           <strong>Farm Address:</strong> {data.farm_address}
         </p>
@@ -214,6 +231,20 @@ const Dashboard = () => {
           <p>No products listed yet.</p>
         )}
       </div>
+      
+      <FarmerProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        currentProfile={{
+          name: data.name,
+          email: data.email,
+          phone_number: data.phone_number || '',
+          farm_address: data.farm_address,
+          farm_size: data.farm_size,
+          crop_types: data.crops || [],
+          resources: data.resources || []
+        }}
+      />
     </>
   );
 
