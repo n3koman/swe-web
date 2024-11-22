@@ -9,7 +9,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-          <h1>Farm Fresh to Your Doorstep</h1>
+          <h1>Farm Fresh to Your Doorste</h1>
           <p>Connecting farmers and buyers directly. Get fresh, organic produce, seeds, and equipment effortlessly.</p>
           <Link to="/register" className="cta-button">Get Started</Link>
         </div>
