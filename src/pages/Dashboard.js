@@ -92,6 +92,43 @@ const Dashboard = () => {
     setIsEditUserModalOpen(true); // Open the modal
   };
 
+  const handleDeleteProduct = async (productId) => {
+    if (!window.confirm("Are you sure you want to delete this product?"))
+      return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      // Delete product images
+      await fetch(
+        `https://swe-backend-livid.vercel.app/farmer/product/${productId}/images`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // Delete product itself
+      const response = await fetch(
+        `https://swe-backend-livid.vercel.app/farmer/product/${productId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete product.");
+      }
+
+      setProducts((prev) => prev.filter((product) => product.id !== productId));
+      alert("Product deleted successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete product. Please try again.");
+    }
+  };
+
   const renderAdministratorDashboard = (data) => {
     const handleDeleteUser = async (userId) => {
       if (!window.confirm("Are you sure you want to delete this user?")) {
@@ -299,14 +336,10 @@ const Dashboard = () => {
                 <div style={styles.productDescription}>
                   {product.description}
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
+                <div style={styles.productSeparator}>
                   <div style={styles.productPrice}>${product.price}</div>
+                </div>
+                <div style={styles.buttonContainer}>
                   <button
                     onClick={() => {
                       setSelectedProduct(product);
@@ -315,6 +348,12 @@ const Dashboard = () => {
                     style={styles.editButton}
                   >
                     Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteProduct(product.id)}
+                    style={styles.deleteButton}
+                  >
+                    Delete
                   </button>
                 </div>
               </div>
@@ -505,16 +544,16 @@ const styles = {
     gap: "20px",
   },
   productCard: {
-    border: "1px solid #ccc",
+    border: "1px solid #ddd",
     borderRadius: "8px",
-    padding: "10px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    padding: "16px",
+    marginBottom: "20px",
+    backgroundColor: "#f9f9f9",
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
-    backgroundColor: "#fff",
   },
   productCardHover: {
-    transform: "scale(1.05)",
-    boxShadow: "0 8px 12px rgba(0, 0, 0, 0.2)",
+    transform: "scale(1.02)",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
   },
   imageContainer: {
     height: "150px",
@@ -523,7 +562,7 @@ const styles = {
     overflow: "hidden",
   },
   productDetails: {
-    padding: "10px",
+    marginTop: "10px",
   },
   productName: {
     fontWeight: "bold",
@@ -536,13 +575,29 @@ const styles = {
     color: "#555",
   },
   productPrice: {
-    fontSize: "16px",
+    fontSize: "18px",
     fontWeight: "bold",
     color: "#333",
+  },
+  buttonContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginTop: "10px",
   },
   editButton: {
     padding: "6px 12px",
     backgroundColor: "#4CAF50",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "bold",
+    transition: "background-color 0.3s ease",
+  },
+  deleteButton: {
+    padding: "6px 12px",
+    backgroundColor: "#FF4B4B",
     color: "#fff",
     border: "none",
     borderRadius: "4px",
