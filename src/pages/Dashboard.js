@@ -6,12 +6,20 @@ import BuyerProfileModal from "./BuyerProfileModal";
 import EditUserModal from "./EditUserModal";
 import ViewProductsModal from "./ViewProductsModal";
 import ViewOrdersModal from "./ViewOrdersModal";
+import AddProductModal from "./AddProductModal";
+import ProductImageDisplay from "./ProductImageDisplay";
+import EditProductModal from "./EditProductModal";
 
 const Dashboard = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isBuyerProfileModalOpen, setIsBuyerProfileModalOpen] = useState(false);
   const [isViewProductsModalOpen, setIsViewProductsModalOpen] = useState(false);
   const [isViewOrdersModalOpen, setIsViewOrdersModalOpen] = useState(false);
+  const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [hoveredProductId, setHoveredProductId] = useState(null);
+  const [isEditProductModalOpen, setIsEditProductModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null); // To store the currently selected product for editing
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
@@ -19,6 +27,18 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const handleProductAdded = (newProduct) => {
+    setProducts((prevProducts) => [...prevProducts, newProduct]);
+  };
+
+  const handleProductUpdated = (updatedProduct) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.id === updatedProduct.id ? updatedProduct : product
+      )
+    );
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token"); // Fetch the JWT token from local storage
@@ -40,6 +60,9 @@ const Dashboard = () => {
           }
         );
         setDashboardData(response.data);
+        if (response.data.dashboard === "Farmer Dashboard") {
+          setProducts(response.data.data.products); // Initialize products for farmer
+        }
       } catch (error) {
         console.log(error.response);
         if (error.response && error.response.status === 401) {
@@ -74,7 +97,7 @@ const Dashboard = () => {
       if (!window.confirm("Are you sure you want to delete this user?")) {
         return; // Exit if the user cancels the action
       }
-  
+
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
@@ -86,18 +109,18 @@ const Dashboard = () => {
             },
           }
         );
-  
+
         if (!response.ok) {
           throw new Error("Failed to delete the user.");
         }
-  
+
         alert("User deleted successfully.");
         // Optionally, refresh the data or remove the user from the local state
       } catch (error) {
         alert(error.message || "An error occurred while deleting the user.");
       }
     };
-  
+
     return (
       <div style={styles.adminContainer}>
         <div style={styles.adminCard}>
@@ -118,7 +141,7 @@ const Dashboard = () => {
             <strong>Total Orders:</strong> {data.total_orders || 0}
           </p>
         </div>
-  
+
         <div style={styles.sectionsContainer}>
           {/* Users Section */}
           <button
@@ -161,7 +184,7 @@ const Dashboard = () => {
               )}
             </div>
           )}
-  
+
           {/* Products Section */}
           <button
             style={styles.sectionButton}
@@ -169,7 +192,7 @@ const Dashboard = () => {
           >
             View Products
           </button>
-  
+
           {/* Orders Section */}
           <button
             style={styles.sectionButton}
@@ -178,7 +201,7 @@ const Dashboard = () => {
             View Orders
           </button>
         </div>
-  
+
         {/* Modals */}
         <EditUserModal
           isOpen={isEditUserModalOpen}
@@ -196,8 +219,6 @@ const Dashboard = () => {
       </div>
     );
   };
-  
-  
 
   const renderFarmerDashboard = (data) => (
     <>
@@ -235,22 +256,71 @@ const Dashboard = () => {
         </p>
       </div>
       <div style={styles.card}>
-        <h2>Products</h2>
-        {data.products.length > 0 ? (
-          data.products.map((product) => (
-            <div key={product.id}>
-              <p>
-                <strong>{product.name}</strong>
-              </p>
-              <p>{product.description}</p>
-              <p>
-                <strong>Price:</strong> ${product.price}
-              </p>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h2>Products</h2>
+          <button
+            onClick={() => setIsAddProductModalOpen(true)}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: "#007bff",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Add Product
+          </button>
+        </div>
+        <div style={styles.productGrid}>
+          {products.map((product) => (
+            <div
+              key={product.id}
+              style={{
+                ...styles.productCard,
+                ...(hoveredProductId === product.id
+                  ? styles.productCardHover
+                  : {}),
+              }}
+              onMouseEnter={() => setHoveredProductId(product.id)}
+              onMouseLeave={() => setHoveredProductId(null)}
+            >
+              <div style={styles.imageContainer}>
+                <ProductImageDisplay productId={product.id} />
+              </div>
+              <div style={styles.productDetails}>
+                <div style={styles.productName}>{product.name}</div>
+                <div style={styles.productDescription}>
+                  {product.description}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div style={styles.productPrice}>${product.price}</div>
+                  <button
+                    onClick={() => {
+                      setSelectedProduct(product);
+                      setIsEditProductModalOpen(true);
+                    }}
+                    style={styles.editButton}
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
             </div>
-          ))
-        ) : (
-          <p>No products listed yet.</p>
-        )}
+          ))}
+        </div>
       </div>
 
       <FarmerProfileModal
@@ -265,6 +335,17 @@ const Dashboard = () => {
           crop_types: data.crops || [],
           resources: data.resources || [],
         }}
+      />
+      <AddProductModal
+        isOpen={isAddProductModalOpen}
+        onClose={() => setIsAddProductModalOpen(false)}
+        onProductAdded={handleProductAdded}
+      />
+      <EditProductModal
+        isOpen={isEditProductModalOpen}
+        onClose={() => setIsEditProductModalOpen(false)}
+        product={selectedProduct}
+        onProductUpdated={handleProductUpdated}
       />
     </>
   );
@@ -417,6 +498,58 @@ const styles = {
     padding: "15px",
     marginBottom: "20px",
     backgroundColor: "#f9f9f9",
+  },
+  productGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+    gap: "20px",
+  },
+  productCard: {
+    border: "1px solid #ccc",
+    borderRadius: "8px",
+    padding: "10px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    backgroundColor: "#fff",
+  },
+  productCardHover: {
+    transform: "scale(1.05)",
+    boxShadow: "0 8px 12px rgba(0, 0, 0, 0.2)",
+  },
+  imageContainer: {
+    height: "150px",
+    marginBottom: "10px",
+    borderRadius: "4px",
+    overflow: "hidden",
+  },
+  productDetails: {
+    padding: "10px",
+  },
+  productName: {
+    fontWeight: "bold",
+    fontSize: "16px",
+    marginBottom: "5px",
+  },
+  productDescription: {
+    fontSize: "14px",
+    marginBottom: "10px",
+    color: "#555",
+  },
+  productPrice: {
+    fontSize: "16px",
+    fontWeight: "bold",
+    color: "#333",
+  },
+  editButton: {
+    padding: "6px 12px",
+    backgroundColor: "#4CAF50",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "bold",
+    transition: "background-color 0.3s ease",
   },
   logoutButton: {
     padding: "10px 20px",
