@@ -329,7 +329,7 @@ const Dashboard = () => {
       <button onClick={handleLogout} style={styles.logoutButton}>
         Logout
       </button>
-      <h1>{dashboard}</h1>
+      <h2>{dashboard}</h2>
       <div style={styles.card}>
         <h2>User Info</h2>
         <p>
@@ -425,7 +425,7 @@ const styles = {
     border: "none",
     borderRadius: "5px",
     cursor: "pointer",
-    marginBottom: "20px",
+    marginBottom: "40px",
     float: "right",
   },
   errorContainer: {
