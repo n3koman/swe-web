@@ -3,10 +3,18 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import FarmerProfileModal from "./FarmerProfileModal";
 import BuyerProfileModal from "./BuyerProfileModal";
+import EditUserModal from "./EditUserModal";
+import ViewProductsModal from "./ViewProductsModal";
+import ViewOrdersModal from "./ViewOrdersModal";
 
 const Dashboard = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isBuyerProfileModalOpen, setIsBuyerProfileModalOpen] = useState(false);
+  const [isViewProductsModalOpen, setIsViewProductsModalOpen] = useState(false);
+  const [isViewOrdersModalOpen, setIsViewOrdersModalOpen] = useState(false);
+
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState("");
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState("");
@@ -52,11 +60,44 @@ const Dashboard = () => {
     navigate("/login"); // Redirect to login page
   };
 
-  const renderAdministratorDashboard = (data) => {
-    const handleSectionClick = (section) => {
-      setSelectedSection(section === selectedSection ? "" : section);
-    };
+  const handleSectionClick = (section) => {
+    setSelectedSection(section === selectedSection ? "" : section);
+  };
 
+  const handleEditUser = (user) => {
+    setSelectedUser(user); // Set the user to edit
+    setIsEditUserModalOpen(true); // Open the modal
+  };
+
+  const renderAdministratorDashboard = (data) => {
+    const handleDeleteUser = async (userId) => {
+      if (!window.confirm("Are you sure you want to delete this user?")) {
+        return; // Exit if the user cancels the action
+      }
+  
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          `https://swe-backend-livid.vercel.app/admin/user/${userId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        if (!response.ok) {
+          throw new Error("Failed to delete the user.");
+        }
+  
+        alert("User deleted successfully.");
+        // Optionally, refresh the data or remove the user from the local state
+      } catch (error) {
+        alert(error.message || "An error occurred while deleting the user.");
+      }
+    };
+  
     return (
       <div style={styles.adminContainer}>
         <div style={styles.adminCard}>
@@ -77,8 +118,9 @@ const Dashboard = () => {
             <strong>Total Orders:</strong> {data.total_orders || 0}
           </p>
         </div>
-
+  
         <div style={styles.sectionsContainer}>
+          {/* Users Section */}
           <button
             style={styles.sectionButton}
             onClick={() => handleSectionClick("users")}
@@ -100,8 +142,18 @@ const Dashboard = () => {
                     <p>
                       <strong>Role:</strong> {user.role}
                     </p>
-                    <button style={styles.actionButton}>Edit</button>
-                    <button style={styles.actionButton}>Delete</button>
+                    <button
+                      style={styles.actionButton}
+                      onClick={() => handleEditUser(user)} // Open the modal with the selected user
+                    >
+                      Edit
+                    </button>
+                    <button
+                      style={styles.actionButton}
+                      onClick={() => handleDeleteUser(user.id)} // Trigger delete user
+                    >
+                      Delete
+                    </button>
                   </div>
                 ))
               ) : (
@@ -109,64 +161,43 @@ const Dashboard = () => {
               )}
             </div>
           )}
-
+  
+          {/* Products Section */}
           <button
             style={styles.sectionButton}
-            onClick={() => handleSectionClick("farmers")}
+            onClick={() => setIsViewProductsModalOpen(true)}
           >
-            {selectedSection === "farmers" ? "Hide Farmers" : "View Farmers"}
+            View Products
           </button>
-          {selectedSection === "farmers" && (
-            <div style={styles.detailContainer}>
-              <h3>Farmers and Their Products</h3>
-              {data.farmers && data.farmers.length > 0 ? (
-                data.farmers.map((farmer) => (
-                  <div key={farmer.id} style={styles.userCard}>
-                    <p>
-                      <strong>Name:</strong> {farmer.name}
-                    </p>
-                    <p>
-                      <strong>Email:</strong> {farmer.email}
-                    </p>
-                    <button style={styles.actionButton}>View Products</button>
-                  </div>
-                ))
-              ) : (
-                <p>No farmers available.</p>
-              )}
-            </div>
-          )}
-
+  
+          {/* Orders Section */}
           <button
             style={styles.sectionButton}
-            onClick={() => handleSectionClick("buyers")}
+            onClick={() => setIsViewOrdersModalOpen(true)}
           >
-            {selectedSection === "buyers" ? "Hide Buyers" : "View Buyers"}
+            View Orders
           </button>
-          {selectedSection === "buyers" && (
-            <div style={styles.detailContainer}>
-              <h3>Buyers and Their Orders</h3>
-              {data.buyers && data.buyers.length > 0 ? (
-                data.buyers.map((buyer) => (
-                  <div key={buyer.id} style={styles.userCard}>
-                    <p>
-                      <strong>Name:</strong> {buyer.name}
-                    </p>
-                    <p>
-                      <strong>Email:</strong> {buyer.email}
-                    </p>
-                    <button style={styles.actionButton}>View Orders</button>
-                  </div>
-                ))
-              ) : (
-                <p>No buyers available.</p>
-              )}
-            </div>
-          )}
         </div>
+  
+        {/* Modals */}
+        <EditUserModal
+          isOpen={isEditUserModalOpen}
+          onClose={() => setIsEditUserModalOpen(false)} // Close the modal
+          user={selectedUser} // Pass the selected user
+        />
+        <ViewProductsModal
+          isOpen={isViewProductsModalOpen}
+          onClose={() => setIsViewProductsModalOpen(false)} // Close the modal
+        />
+        <ViewOrdersModal
+          isOpen={isViewOrdersModalOpen}
+          onClose={() => setIsViewOrdersModalOpen(false)} // Close the modal
+        />
       </div>
     );
   };
+  
+  
 
   const renderFarmerDashboard = (data) => (
     <>
