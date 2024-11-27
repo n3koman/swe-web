@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import FarmerProfileModal from "./FarmerProfileModal";
-import BuyerProfileModal from "./BuyerProfileModal";
-import EditUserModal from "./EditUserModal";
-import ViewProductsModal from "./ViewProductsModal";
-import ViewOrdersModal from "./ViewOrdersModal";
-import ViewUsersModal from "./ViewUsersModal";
-import AddProductModal from "./AddProductModal";
-import ProductImageDisplay from "./ProductImageDisplay";
-import EditProductModal from "./EditProductModal";
+import FarmerProfileModal from "./modals/FarmerProfileModal";
+import BuyerProfileModal from "./modals/BuyerProfileModal";
+import EditUserModal from "./modals/EditUserModal";
+import ViewProductsModal from "./modals/ViewProductsModal";
+import ViewOrdersModal from "./modals/ViewOrdersModal";
+import ViewUsersModal from "./modals/ViewUsersModal";
+import AddProductModal from "./modals/AddProductModal";
+import ProductImageDisplay from "./modals/ProductImageDisplay";
+import EditProductModal from "./modals/EditProductModal";
 
 const Dashboard = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -327,47 +327,68 @@ const Dashboard = () => {
     </>
   );
 
-  const renderBuyerDashboard = (data) => (
-    <div style={styles.card}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h2>Buyer Info</h2>
-        <button
-          onClick={() => setIsBuyerProfileModalOpen(true)}
+  const renderBuyerDashboard = (data) => {
+    const goToShop = () => {
+      navigate("/shop");
+    };
+
+    return (
+      <div style={styles.card}>
+        <div
           style={{
-            padding: "8px 16px",
-            backgroundColor: "#4CAF50",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          Manage Profile
-        </button>
+          <h2>Buyer Info</h2>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              onClick={() => setIsBuyerProfileModalOpen(true)}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "#4CAF50",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              Manage Profile
+            </button>
+            <button
+              onClick={goToShop}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: "#007bff",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              Go to Shop
+            </button>
+          </div>
+        </div>
+        <p>
+          <strong>Delivery Address:</strong> {data.delivery_address}
+        </p>
+
+        <BuyerProfileModal
+          isOpen={isBuyerProfileModalOpen}
+          onClose={() => setIsBuyerProfileModalOpen(false)}
+          currentProfile={{
+            name: data.name,
+            email: data.email,
+            phone_number: data.phone_number || "",
+            delivery_address: data.delivery_address || "",
+          }}
+        />
       </div>
-      <p>
-        <strong>Delivery Address:</strong> {data.delivery_address}
-      </p>
-
-      <BuyerProfileModal
-        isOpen={isBuyerProfileModalOpen}
-        onClose={() => setIsBuyerProfileModalOpen(false)}
-        currentProfile={{
-          name: data.name,
-          email: data.email,
-          phone_number: data.phone_number || "",
-          delivery_address: data.delivery_address || "",
-        }}
-      />
-    </div>
-  );
-
+    );
+  };
+  
   if (error) {
     return (
       <div style={styles.errorContainer}>
