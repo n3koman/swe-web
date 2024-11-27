@@ -70,13 +70,12 @@ const Register = () => {
           <option value="buyer">Buyer</option>
         </select>
 
-        <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} style={styles.input} required />
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={styles.input} required />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} required />
-        <input type="text" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} style={styles.input} required />
-
         {userType === 'farmer' && (
           <>
+            <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} style={styles.input} required />
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={styles.input} required />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} required />
+            <input type="text" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} style={styles.input} required />
             <input type="text" placeholder="Farm Address" value={farmAddress} onChange={(e) => setFarmAddress(e.target.value)} style={styles.input} required />
             <input type="number" placeholder="Farm Size (in acres)" value={farmSize} onChange={(e) => setFarmSize(e.target.value)} style={styles.input} required />
             <input type="text" placeholder="Crops (comma-separated)" value={crops} onChange={(e) => setCrops(e.target.value)} style={styles.input} required />
@@ -85,7 +84,13 @@ const Register = () => {
         )}
 
         {userType === 'buyer' && (
-          <input type="text" placeholder="Delivery Address" value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} style={styles.input} required />
+          <>
+            <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} style={styles.input} required />
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={styles.input} required />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} required />
+            <input type="text" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} style={styles.input} required />
+            <input type="text" placeholder="Delivery Address" value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} style={styles.input} required />
+          </>
         )}
 
         <button type="submit" style={styles.button}>Register</button>
