@@ -4,7 +4,6 @@ const ViewProductsModal = ({ isOpen, onClose }) => {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -87,17 +86,6 @@ const ViewProductsModal = ({ isOpen, onClose }) => {
     return acc;
   }, {});
 
-  // Handle image modal open and close
-  const openImageModal = (image) => {
-    setSelectedImage(image);
-    setTimeout(() => setIsAnimating(true), 10);
-  };
-
-  const closeImageModal = () => {
-    setIsAnimating(false);
-    setTimeout(() => setSelectedImage(null), 300);
-  };
-
   return (
     <div
       className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${
@@ -113,7 +101,6 @@ const ViewProductsModal = ({ isOpen, onClose }) => {
       >
         {/* Top-right Buttons */}
         <div className="absolute top-3 right-3 flex space-x-2 z-50">
-          {/* Update Button */}
           <button
             className="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-green-700"
             onClick={fetchProductsWithImages}
@@ -121,7 +108,6 @@ const ViewProductsModal = ({ isOpen, onClose }) => {
           >
             🔄
           </button>
-          {/* Close Button */}
           <button
             onClick={handleClose}
             className="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-red-700"
@@ -154,17 +140,14 @@ const ViewProductsModal = ({ isOpen, onClose }) => {
                       {categorizedProducts[category].map((product) => (
                         <div
                           key={product.id}
-                          className="p-4 border border-gray-200 rounded-lg bg-gray-50 shadow-md"
+                          className="p-4 border border-gray-200 rounded-lg bg-gray-50 shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-lg"
                         >
                           <div className="mb-4">
                             {product.images.length > 0 ? (
                               <img
                                 src={`data:${product.images[0].mime_type};base64,${product.images[0].image_data}`}
                                 alt={product.name}
-                                className="w-full h-40 object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-105"
-                                onClick={() =>
-                                  openImageModal(product.images[0])
-                                }
+                                className="w-full h-40 object-cover rounded-lg"
                               />
                             ) : (
                               <div className="w-full h-40 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -208,35 +191,6 @@ const ViewProductsModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
-
-      {/* Image Modal */}
-      {selectedImage && (
-        <div
-          className={`fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 transition-opacity duration-300 ${
-            isAnimating ? "opacity-100" : "opacity-0"
-          }`}
-          onClick={closeImageModal}
-        >
-          <div
-            className={`relative bg-white rounded-lg overflow-hidden transition-transform duration-300 ${
-              isAnimating ? "scale-100" : "scale-90"
-            }`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={`data:${selectedImage.mime_type};base64,${selectedImage.image_data}`}
-              alt="Full View"
-              className="w-full h-auto"
-            />
-            <button
-              onClick={closeImageModal}
-              className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-red-700 z-50"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
