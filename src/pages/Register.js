@@ -95,6 +95,8 @@ const Register = () => {
 
         <button type="submit" style={styles.button}>Register</button>
 
+        <Link to="/" style={styles.homeButton}>Back to Homepage</Link>
+
         {/* Add login redirect link */}
         <p style={styles.loginText}>
           Already have an account? <Link to="/login" style={styles.loginLink}>Log in</Link>
@@ -121,7 +123,7 @@ const styles = {
   },
   input: {
     padding: '10px',
-    margin: '10px 0',
+    margin: '8px 0',
     borderRadius: '5px',
     border: '1px solid #ccc',
     fontSize: '16px',
@@ -135,6 +137,7 @@ const styles = {
   },
   button: {
     padding: '10px',
+    marginTop: '8px',
     backgroundColor: '#28a745',
     color: 'white',
     fontSize: '16px',
@@ -150,8 +153,20 @@ const styles = {
     color: 'green',
     fontSize: '14px',
   },
+  homeButton: {
+    backgroundColor: '#ffffff',
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    padding: '10px 20px',
+    marginTop: '10px',
+    textDecoration: 'none',
+    textAlign: 'center',
+    color: '#333',
+    cursor: 'pointer',
+  },
   loginText: {
     marginTop: '10px',
+    marginBottom: '10px',
     fontSize: '14px',
     textAlign: 'center', // Center-aligns the text
   },

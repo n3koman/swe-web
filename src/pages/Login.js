@@ -55,6 +55,8 @@ const Login = () => {
           required
         />
         <button type="submit" style={styles.button}>Login</button>
+
+        <Link to="/" style={styles.homeButton}>Back to Homepage</Link>
       </form>
       <p style={styles.registerText}>
         Don't have an account? <Link to="/register" style={styles.registerLink}>Register here</Link>
@@ -92,6 +94,17 @@ const styles = {
     fontSize: '16px',
     border: 'none',
     borderRadius: '5px',
+    cursor: 'pointer',
+  },
+  homeButton: {
+    backgroundColor: '#ffffff',
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    padding: '10px 20px',
+    marginTop: '10px',
+    textDecoration: 'none',
+    textAlign: 'center',
+    color: '#333',
     cursor: 'pointer',
   },
   error: {
