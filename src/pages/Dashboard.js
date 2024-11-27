@@ -6,6 +6,7 @@ import BuyerProfileModal from "./BuyerProfileModal";
 import EditUserModal from "./EditUserModal";
 import ViewProductsModal from "./ViewProductsModal";
 import ViewOrdersModal from "./ViewOrdersModal";
+import ViewUsersModal from "./ViewUsersModal";
 import AddProductModal from "./AddProductModal";
 import ProductImageDisplay from "./ProductImageDisplay";
 import EditProductModal from "./EditProductModal";
@@ -15,6 +16,7 @@ const Dashboard = () => {
   const [isBuyerProfileModalOpen, setIsBuyerProfileModalOpen] = useState(false);
   const [isViewProductsModalOpen, setIsViewProductsModalOpen] = useState(false);
   const [isViewOrdersModalOpen, setIsViewOrdersModalOpen] = useState(false);
+  const [isViewUsersModalOpen, setIsViewUsersModalOpen] = useState(false);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [hoveredProductId, setHoveredProductId] = useState(null);
@@ -23,7 +25,7 @@ const Dashboard = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
-  const [selectedSection, setSelectedSection] = useState("");
+
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -82,11 +84,6 @@ const Dashboard = () => {
     localStorage.removeItem("token"); // Remove the JWT token from local storage
     navigate("/login"); // Redirect to login page
   };
-
-  const handleSectionClick = (section) => {
-    setSelectedSection(section === selectedSection ? "" : section);
-  };
-
   const handleEditUser = (user) => {
     setSelectedUser(user); // Set the user to edit
     setIsEditUserModalOpen(true); // Open the modal
@@ -130,34 +127,6 @@ const Dashboard = () => {
   };
 
   const renderAdministratorDashboard = (data) => {
-    const handleDeleteUser = async (userId) => {
-      if (!window.confirm("Are you sure you want to delete this user?")) {
-        return; // Exit if the user cancels the action
-      }
-
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(
-          `https://swe-backend-livid.vercel.app/admin/user/${userId}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to delete the user.");
-        }
-
-        alert("User deleted successfully.");
-        // Optionally, refresh the data or remove the user from the local state
-      } catch (error) {
-        alert(error.message || "An error occurred while deleting the user.");
-      }
-    };
-
     return (
       <div style={styles.adminContainer}>
         <div style={styles.adminCard}>
@@ -180,48 +149,12 @@ const Dashboard = () => {
         </div>
 
         <div style={styles.sectionsContainer}>
-          {/* Users Section */}
           <button
             style={styles.sectionButton}
-            onClick={() => handleSectionClick("users")}
+            onClick={() => setIsViewUsersModalOpen(true)} // Open ViewUsersModal
           >
-            {selectedSection === "users" ? "Hide Users" : "View Users"}
+            View Users
           </button>
-          {selectedSection === "users" && (
-            <div style={styles.detailContainer}>
-              <h3>All Users</h3>
-              {data.users && data.users.length > 0 ? (
-                data.users.map((user) => (
-                  <div key={user.id} style={styles.userCard}>
-                    <p>
-                      <strong>Name:</strong> {user.name}
-                    </p>
-                    <p>
-                      <strong>Email:</strong> {user.email}
-                    </p>
-                    <p>
-                      <strong>Role:</strong> {user.role}
-                    </p>
-                    <button
-                      style={styles.actionButton}
-                      onClick={() => handleEditUser(user)} // Open the modal with the selected user
-                    >
-                      Edit
-                    </button>
-                    <button
-                      style={styles.actionButton}
-                      onClick={() => handleDeleteUser(user.id)} // Trigger delete user
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p>No users available.</p>
-              )}
-            </div>
-          )}
-
           {/* Products Section */}
           <button
             style={styles.sectionButton}
@@ -240,6 +173,11 @@ const Dashboard = () => {
         </div>
 
         {/* Modals */}
+        <ViewUsersModal
+          isOpen={isViewUsersModalOpen}
+          onClose={() => setIsViewUsersModalOpen(false)}
+          onEditUser={handleEditUser}
+        />
         <EditUserModal
           isOpen={isEditUserModalOpen}
           onClose={() => setIsEditUserModalOpen(false)} // Close the modal

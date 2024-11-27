@@ -7,13 +7,32 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
     price: "",
     stock: "",
     description: "",
-    images: [], // Base64 strings
+    images: [],
   });
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [previewImages, setPreviewImages] = useState([]);
+
+  const categories = [
+    "Fruits",
+    "Vegetables",
+    "Grains",
+    "Dairy Products",
+    "Poultry and Meat",
+    "Fish and Seafood",
+    "Herbs and Spices",
+    "Nuts and Seeds",
+    "Flowers and Plants",
+    "Processed Goods",
+    "Organic Products",
+    "Exotic Items",
+    "Hydroponic Produce",
+    "Livestock Feed",
+    "Medicinal Plants",
+    "Handmade or Artisanal Products",
+  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -31,7 +50,6 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
       return;
     }
 
-    // Reset previous images and previews
     setFormData((prev) => ({ ...prev, images: [] }));
     setPreviewImages([]);
 
@@ -40,7 +58,6 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => {
-            // Extract Base64 data without the metadata prefix
             const base64String = reader.result.split(",")[1];
             resolve(base64String);
           };
@@ -54,7 +71,6 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
           ...prev,
           images: base64Images,
         }));
-        // Generate local preview URLs
         const previews = files.map((file) => URL.createObjectURL(file));
         setPreviewImages(previews);
       })
@@ -70,7 +86,6 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
     setSuccess("");
     setLoading(true);
 
-    // Validate inputs
     if (!formData.name || !formData.category || !formData.price || !formData.stock) {
       setError("Please fill in all required fields.");
       setLoading(false);
@@ -115,7 +130,6 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
         stock: parseInt(formData.stock),
       });
 
-      // Reset form
       setTimeout(() => {
         setFormData({
           name: "",
@@ -173,14 +187,20 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Category</label>
-              <input
-                type="text"
+              <select
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 required
-              />
+              >
+                <option value="">Select Category</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Price</label>

@@ -14,7 +14,25 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Initialize modal state with product details when it opens
+  const categories = [
+    "Fruits",
+    "Vegetables",
+    "Grains",
+    "Dairy Products",
+    "Poultry and Meat",
+    "Fish and Seafood",
+    "Herbs and Spices",
+    "Nuts and Seeds",
+    "Flowers and Plants",
+    "Processed Goods",
+    "Organic Products",
+    "Exotic Items",
+    "Hydroponic Produce",
+    "Livestock Feed",
+    "Medicinal Plants",
+    "Handmade or Artisanal Products",
+  ];
+
   useEffect(() => {
     if (product) {
       setFormData({
@@ -26,7 +44,6 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
         images: [],
       });
 
-      // Fetch existing images
       const fetchImages = async () => {
         try {
           const token = localStorage.getItem("token");
@@ -89,7 +106,6 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
     const token = localStorage.getItem("token");
 
     try {
-      // Update product details
       const productResponse = await fetch(
         `https://swe-backend-livid.vercel.app/farmer/product/${product.id}`,
         {
@@ -113,7 +129,6 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
         throw new Error(data.error || "Failed to update product details");
       }
 
-      // Update product images if provided
       if (formData.images.length > 0) {
         const imageResponse = await fetch(
           `https://swe-backend-livid.vercel.app/farmer/product/${product.id}/images`,
@@ -172,25 +187,69 @@ const EditProductModal = ({ isOpen, onClose, product, onProductUpdated }) => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {["name", "category", "price", "stock", "description"].map(
-              (field) => (
-                <div key={field}>
-                  <label className="block text-sm font-medium mb-1 capitalize">
-                    {field}
-                  </label>
-                  <input
-                    type={field === "price" || field === "stock" ? "number" : "text"}
-                    name={field}
-                    value={formData[field]}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    required={field !== "description"}
-                    min={field === "price" || field === "stock" ? "0" : undefined}
-                  />
-                </div>
-              )
-            )}
-
+            <div>
+              <label className="block text-sm font-medium mb-1">Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Category</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                required
+              >
+                <option value="">Select Category</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Price</label>
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Stock</label>
+              <input
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                min="0"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                rows={4}
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium mb-1">
                 Images (Max 5)

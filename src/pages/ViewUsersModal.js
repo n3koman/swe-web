@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-const ViewOrdersModal = ({ isOpen, onClose }) => {
-  const [orders, setOrders] = useState([]);
+const ViewUsersModal = ({ isOpen, onClose, onEditUser }) => {
+  const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -10,11 +10,11 @@ const ViewOrdersModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       setIsModalVisible(true);
-      setTimeout(() => setIsAnimating(true), 10); // Trigger animation
-      fetchOrders();
+      setTimeout(() => setIsAnimating(true), 10); // Start animation
+      fetchUsers();
     } else {
       setIsAnimating(false);
-      setTimeout(() => setIsModalVisible(false), 300); // Match animation duration
+      setTimeout(() => setIsModalVisible(false), 300); // End animation
     }
   }, [isOpen]);
 
@@ -38,14 +38,14 @@ const ViewOrdersModal = ({ isOpen, onClose }) => {
     };
   }, [isOpen, onClose]);
 
-  const fetchOrders = async () => {
+  const fetchUsers = async () => {
     setError("");
     setLoading(true);
 
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://swe-backend-livid.vercel.app/admin/orders",
+        "https://swe-backend-livid.vercel.app/admin/users",
         {
           method: "GET",
           headers: {
@@ -57,14 +57,42 @@ const ViewOrdersModal = ({ isOpen, onClose }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch orders");
+        throw new Error(data.error || "Failed to fetch users");
       }
 
-      setOrders(data.orders);
+      setUsers(data.users);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) {
+      return; // Exit if the user cancels the action
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `https://swe-backend-livid.vercel.app/admin/user/${userId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete the user.");
+      }
+
+      setUsers(users.filter((user) => user.id !== userId));
+      alert("User deleted successfully.");
+    } catch (error) {
+      alert(error.message || "An error occurred while deleting the user.");
     }
   };
 
@@ -73,7 +101,11 @@ const ViewOrdersModal = ({ isOpen, onClose }) => {
     setTimeout(() => {
       setIsModalVisible(false);
       onClose();
-    }, 300); // Match animation duration
+    }, 300); // End animation
+  };
+
+  const formatRole = (role) => {
+    return role.replace("Role.", ""); // Remove "Role." prefix
   };
 
   if (!isModalVisible) return null;
@@ -96,7 +128,7 @@ const ViewOrdersModal = ({ isOpen, onClose }) => {
           {/* Update Button */}
           <button
             className="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-green-700"
-            onClick={fetchOrders}
+            onClick={fetchUsers}
             title="Update List"
           >
             🔄
@@ -113,7 +145,7 @@ const ViewOrdersModal = ({ isOpen, onClose }) => {
 
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold">All Orders</h2>
+            <h2 className="text-2xl font-semibold">All Users</h2>
           </div>
 
           {error && (
@@ -123,35 +155,42 @@ const ViewOrdersModal = ({ isOpen, onClose }) => {
           )}
 
           {loading ? (
-            <p>Loading orders...</p>
+            <p>Loading users...</p>
           ) : (
             <div className="space-y-4">
-              {orders.length > 0 ? (
-                orders.map((order) => (
+              {users.length > 0 ? (
+                users.map((user) => (
                   <div
-                    key={order.id}
-                    className="p-4 border border-gray-200 rounded bg-gray-50 shadow-md"
+                    key={user.id}
+                    className="p-4 border border-gray-200 rounded-lg bg-gray-50 shadow-md"
                   >
                     <p>
-                      <strong>Order ID:</strong> {order.id}
+                      <strong>Name:</strong> {user.name}
                     </p>
                     <p>
-                      <strong>Buyer ID:</strong> {order.buyer_id}
+                      <strong>Email:</strong> {user.email}
                     </p>
                     <p>
-                      <strong>Status:</strong> {order.status}
+                      <strong>Role:</strong> {formatRole(user.role)}
                     </p>
-                    <p>
-                      <strong>Total Price:</strong> ${order.total_price}
-                    </p>
-                    <p>
-                      <strong>Created At:</strong>{" "}
-                      {new Date(order.created_at).toLocaleString()}
-                    </p>
+                    <div className="flex justify-end space-x-2 mt-4">
+                      <button
+                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        onClick={() => onEditUser(user)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                        onClick={() => handleDeleteUser(user.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))
               ) : (
-                <p>No orders available.</p>
+                <p>No users available.</p>
               )}
             </div>
           )}
@@ -170,4 +209,4 @@ const ViewOrdersModal = ({ isOpen, onClose }) => {
   );
 };
 
-export default ViewOrdersModal;
+export default ViewUsersModal;
