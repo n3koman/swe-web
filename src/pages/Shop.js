@@ -6,6 +6,9 @@ import {
   SortAsc,
   SortDesc,
   Layout,
+  ShoppingCart,
+  Trash2,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ViewProductDetailModal from "./modals/ViewProductDetailModal";
@@ -16,6 +19,12 @@ const Shop = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [showCart, setShowCart] = useState(false);
+  const [cartAnimationState, setCartAnimationState] = useState({
+    isOpen: false,
+    isClosing: false,
+  });
 
   // Filter state
   const [showFilters, setShowFilters] = useState(false);
@@ -118,6 +127,24 @@ const Shop = () => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === "Escape" && showCart) {
+        closeCart();
+      }
+    };
+
+    // Add event listener when cart is open
+    if (showCart) {
+      window.addEventListener("keydown", handleEscapeKey);
+    }
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, [showCart]);
+
   const handleSearch = () => {
     fetchProducts(searchQuery, filters);
   };
@@ -151,6 +178,56 @@ const Shop = () => {
     setShowFilters(false);
   };
 
+  const addToCart = (product) => {
+    const existingProduct = cart.find((item) => item.id === product.id);
+    if (existingProduct) {
+      setCart(
+        cart.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
+    } else {
+      setCart([...cart, { ...product, quantity: 1 }]);
+    }
+  };
+
+  const removeFromCart = (productId) => {
+    setCart(cart.filter((item) => item.id !== productId));
+  };
+
+  const updateCartQuantity = (productId, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeFromCart(productId);
+    } else {
+      setCart(
+        cart.map((item) =>
+          item.id === productId ? { ...item, quantity: newQuantity } : item
+        )
+      );
+    }
+  };
+
+  const openCart = () => {
+    setShowCart(true);
+    setTimeout(() => {
+      setCartAnimationState({ isOpen: true, isClosing: false });
+    }, 10);
+  };
+
+  const closeCart = () => {
+    setCartAnimationState({ isOpen: false, isClosing: true });
+    setTimeout(() => {
+      setShowCart(false);
+      setCartAnimationState({ isOpen: false, isClosing: false });
+    }, 300);
+  };
+
+  const handleCheckout = () => {
+    navigate("/cart");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-6 relative">
@@ -159,13 +236,22 @@ const Shop = () => {
             <Package className="mr-3 text-blue-600" size={32} />
             Farmers Market
           </h1>
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center"
-          >
-            <Layout className="mr-2" size={16} />
-            Dashboard
-          </button>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={openCart}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center"
+            >
+              <ShoppingCart className="mr-2" size={16} />
+              Cart ({cart.length})
+            </button>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center"
+            >
+              <Layout className="mr-2" size={16} />
+              Dashboard
+            </button>
+          </div>
         </div>
 
         <div className="flex space-x-2 mb-4">
@@ -355,16 +441,19 @@ const Shop = () => {
             <div
               key={product.id}
               className="border rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => handleProductClick(product)}
             >
               {product.images && product.images[0]?.data ? (
                 <img
                   src={`data:${product.images[0].mime_type};base64,${product.images[0].data}`}
                   alt={product.name}
                   className="w-full h-40 object-cover rounded-md mb-3"
+                  onClick={() => handleProductClick(product)}
                 />
               ) : (
-                <div className="w-full h-40 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
+                <div
+                  className="w-full h-40 bg-gray-200 rounded-md flex items-center justify-center text-gray-500"
+                  onClick={() => handleProductClick(product)}
+                >
                   No Image
                 </div>
               )}
@@ -383,6 +472,21 @@ const Shop = () => {
                 <span className="text-lg font-bold text-blue-600">
                   ${product.price.toFixed(2)}
                 </span>
+                {cart.find((item) => item.id === product.id) ? (
+                  <button
+                    onClick={() => removeFromCart(product.id)}
+                    className="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => addToCart(product)}
+                    className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-blue-700"
+                  >
+                    <ShoppingCart size={16} />
+                  </button>
+                )}
               </div>
               <p className="text-sm text-gray-600">
                 <strong>Farmer:</strong> {product.farmer_name || "N/A"}
@@ -405,6 +509,118 @@ const Shop = () => {
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
         />
+      )}
+      {showCart && (
+        <div
+          className={`fixed inset-0 bg-black transition-opacity duration-300 
+          ${cartAnimationState.isOpen ? "bg-opacity-50" : "bg-opacity-0"}`}
+          onClick={closeCart}
+        >
+          <div
+            className={`absolute right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
+              ${
+                cartAnimationState.isOpen ? "translate-x-0" : "translate-x-full"
+              }
+              ${cartAnimationState.isClosing ? "translate-x-full" : ""}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="h-full flex flex-col">
+              <div className="flex justify-between items-center p-6 border-b">
+                <h2 className="text-2xl font-bold">Your Cart</h2>
+                <button
+                  onClick={closeCart}
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {cart.length === 0 ? (
+                <div className="flex-grow flex items-center justify-center text-center text-gray-500">
+                  <div>
+                    <ShoppingCart
+                      size={48}
+                      className="mx-auto mb-4 opacity-50"
+                    />
+                    <p>Your cart is empty</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-grow overflow-y-auto p-6">
+                  {cart.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center border-b py-3 last:border-b-0"
+                    >
+                      {item.images && item.images[0]?.data ? (
+                        <img
+                          src={`data:${item.images[0].mime_type};base64,${item.images[0].data}`}
+                          alt={item.name}
+                          className="w-16 h-16 object-cover rounded-md mr-4"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-200 rounded-md mr-4"></div>
+                      )}
+                      <div className="flex-grow">
+                        <h3 className="font-semibold">{item.name}</h3>
+                        <p className="text-sm text-gray-600">
+                          ${item.price.toFixed(2)} each
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() =>
+                            updateCartQuantity(item.id, item.quantity - 1)
+                          }
+                          className="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            updateCartQuantity(item.id, Number(e.target.value))
+                          }
+                          className="w-12 text-center border rounded"
+                          min="1"
+                        />
+                        <button
+                          onClick={() =>
+                            updateCartQuantity(item.id, item.quantity + 1)
+                          }
+                          className="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {cart.length > 0 && (
+                <div className="p-6 border-t">
+                  <p className="text-xl font-bold mb-4">
+                    Total: $
+                    {cart
+                      .reduce(
+                        (total, item) => total + item.price * item.quantity,
+                        0
+                      )
+                      .toFixed(2)}
+                  </p>
+                  <button
+                    onClick={handleCheckout}
+                    className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors"
+                  >
+                    Proceed to Checkout
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
