@@ -122,9 +122,26 @@ const Shop = () => {
       setLoading(false);
     }
   };
+  const fetchCartItems = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        "https://swe-backend-livid.vercel.app/buyer/cart",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to fetch cart.");
+
+      setCart(data.cart_items);
+    } catch (error) {
+      console.error("Error fetching cart items:", error);
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
+    fetchCartItems();
   }, []);
 
   useEffect(() => {
@@ -177,45 +194,116 @@ const Shop = () => {
     fetchProducts();
     setShowFilters(false);
   };
+  const addToCart = async (product) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(
+        "https://swe-backend-livid.vercel.app/buyer/cart",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cart: [{ product_id: product.id, quantity: 1 }],
+          }),
+        }
+      );
 
-  const addToCart = (product) => {
-    const existingProduct = cart.find((item) => item.id === product.id);
-    if (existingProduct) {
-      setCart(
-        cart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+      if (!response.ok) throw new Error("Failed to add product to cart.");
+
+      // Refetch the cart to ensure the UI reflects the backend
+      await fetchCartItems();
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+
+  const removeFromCart = async (productId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Authorization token is missing");
+
+      const response = await fetch(
+        "https://swe-backend-livid.vercel.app/buyer/cart/remove",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ product_id: productId }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to remove product from cart");
+
+      // Update the cart state to remove the product
+      setCart((prevCart) =>
+        prevCart.filter((item) => item.product_id !== productId)
+      );
+    } catch (error) {
+      console.error("Error removing product from cart:", error);
+      setError("Failed to remove product from cart. Please try again.");
+    }
+  };
+
+  const updateCartQuantity = async (productId, newQuantity) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Authorization token is missing");
+        return;
+      }
+
+      // If quantity is 0 or less, explicitly remove the item from the cart
+      if (newQuantity <= 0) {
+        await removeFromCart(productId);
+        return;
+      }
+
+      // Send the updated quantity to the backend
+      const response = await fetch(
+        "https://swe-backend-livid.vercel.app/buyer/cart",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            cart: [{ product_id: productId, quantity: newQuantity }],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to update cart in the backend.");
+      }
+
+      // Update the cart state immediately for better UI feedback
+      setCart((prevCart) =>
+        prevCart.map((item) =>
+          item.product_id === productId
+            ? { ...item, quantity: newQuantity }
             : item
         )
       );
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+    } catch (error) {
+      console.error("Error updating cart quantity:", error);
+      alert(error.message || "Failed to update cart. Please try again.");
     }
   };
 
-  const removeFromCart = (productId) => {
-    setCart(cart.filter((item) => item.id !== productId));
-  };
-
-  const updateCartQuantity = (productId, newQuantity) => {
-    if (newQuantity <= 0) {
-      removeFromCart(productId);
-    } else {
-      setCart(
-        cart.map((item) =>
-          item.id === productId ? { ...item, quantity: newQuantity } : item
-        )
-      );
-    }
-  };
-
-  const openCart = () => {
+  const openCart = async () => {
+    await fetchCartItems(); // Fetch the latest cart items from the backend
     setShowCart(true);
     setTimeout(() => {
       setCartAnimationState({ isOpen: true, isClosing: false });
     }, 10);
   };
-
   const closeCart = () => {
     setCartAnimationState({ isOpen: false, isClosing: true });
     setTimeout(() => {
@@ -224,8 +312,21 @@ const Shop = () => {
     }, 300);
   };
 
-  const handleCheckout = () => {
-    navigate("/cart");
+  const isProductInCart = (productId) => {
+    return cart.some((item) => item.product_id === productId);
+  };
+
+  const handleCheckout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Authorization token is missing");
+
+      // Navigate to cart page after ensuring items are added
+      navigate("/checkout");
+    } catch (err) {
+      console.error("Error during checkout:", err);
+      setError("Error proceeding to checkout.");
+    }
   };
 
   return (
@@ -472,7 +573,7 @@ const Shop = () => {
                 <span className="text-lg font-bold text-blue-600">
                   ${product.price.toFixed(2)}
                 </span>
-                {cart.find((item) => item.id === product.id) ? (
+                {isProductInCart(product.id) ? (
                   <button
                     onClick={() => removeFromCart(product.id)}
                     className="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600"
@@ -552,6 +653,7 @@ const Shop = () => {
                       key={item.id}
                       className="flex items-center border-b py-3 last:border-b-0"
                     >
+                      {/* Product Image */}
                       {item.images && item.images[0]?.data ? (
                         <img
                           src={`data:${item.images[0].mime_type};base64,${item.images[0].data}`}
@@ -561,34 +663,49 @@ const Shop = () => {
                       ) : (
                         <div className="w-16 h-16 bg-gray-200 rounded-md mr-4"></div>
                       )}
+
+                      {/* Product Details */}
                       <div className="flex-grow">
                         <h3 className="font-semibold">{item.name}</h3>
                         <p className="text-sm text-gray-600">
-                          ${item.price.toFixed(2)} each
+                          ${item.price ? item.price.toFixed(2) : "0.00"} each
                         </p>
                       </div>
+
+                      {/* Quantity Controls */}
                       <div className="flex items-center space-x-2">
+                        {/* Decrease Quantity Button */}
                         <button
-                          onClick={() =>
-                            updateCartQuantity(item.id, item.quantity - 1)
-                          }
+                          onClick={() => {
+                            const newQuantity = item.quantity - 1; // Decrease quantity by 1
+                            updateCartQuantity(item.id, newQuantity); // Handles visual update and removal
+                          }}
                           className="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center"
                         >
                           -
                         </button>
+
+                        {/* Quantity Input Field */}
                         <input
                           type="number"
-                          value={item.quantity}
-                          onChange={(e) =>
-                            updateCartQuantity(item.id, Number(e.target.value))
-                          }
+                          value={item.quantity || 1}
+                          onChange={(e) => {
+                            const newQuantity = Math.max(
+                              Number(e.target.value),
+                              1
+                            ); // Ensure minimum value of 1
+                            updateCartQuantity(item.id, newQuantity);
+                          }}
                           className="w-12 text-center border rounded"
                           min="1"
                         />
+
+                        {/* Increase Quantity Button */}
                         <button
-                          onClick={() =>
-                            updateCartQuantity(item.id, item.quantity + 1)
-                          }
+                          onClick={() => {
+                            const newQuantity = item.quantity + 1; // Increase quantity by 1
+                            updateCartQuantity(item.id, newQuantity);
+                          }}
                           className="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center"
                         >
                           +
