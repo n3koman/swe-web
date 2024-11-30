@@ -23,6 +23,7 @@ const Checkout = () => {
       );
 
       const data = await response.json();
+      console.log("Fetched cart items:", data.cart_items); // Debug cart items
       if (!response.ok) throw new Error(data.error || "Failed to fetch cart.");
 
       setCart(data.cart_items);
@@ -36,18 +37,20 @@ const Checkout = () => {
 
   // Update cart quantity
   const updateCartQuantity = async (productId, quantity) => {
-    if (!productId || quantity < 0) {
-      console.error("Invalid product or quantity:", { productId, quantity });
-      setError("Invalid product or quantity. Please refresh and try again.");
-      return;
-    }
-
-    if (quantity === 0) {
-      await removeFromCart(productId);
-      return;
-    }
-
     try {
+      if (
+        !productId ||
+        quantity === null ||
+        quantity === undefined ||
+        quantity < 0
+      ) {
+        console.error("Invalid product ID or quantity:", {
+          productId,
+          quantity,
+        });
+        throw new Error("Invalid product ID or quantity.");
+      }
+
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Authorization token is missing");
 
@@ -60,17 +63,20 @@ const Checkout = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            cart: [{ product_id: productId, quantity }],
+            cart: [{ product_id: productId, quantity }], // Changed from id to product_id
           }),
         }
       );
 
-      if (!response.ok) throw new Error("Failed to update cart.");
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to update cart.");
+      }
 
       // Update local cart state
       setCart((prevCart) =>
-        prevCart.map((item) =>
-          item.product_id === productId ? { ...item, quantity } : item
+        prevCart.map(
+          (item) => (item.id === productId ? { ...item, quantity } : item) // Changed from product_id to id
         )
       );
     } catch (err) {
@@ -100,15 +106,14 @@ const Checkout = () => {
       if (!response.ok) throw new Error("Failed to remove item from cart.");
 
       // Update local cart state
-      setCart((prevCart) =>
-        prevCart.filter((item) => item.product_id !== productId)
+      setCart(
+        (prevCart) => prevCart.filter((item) => item.id !== productId) // Changed from product_id to id
       );
     } catch (err) {
       console.error("Error removing product from cart:", err);
       setError(err.message || "Failed to remove product from cart.");
     }
   };
-
   // Calculate total price
   const calculateTotalPrice = () => {
     return cart.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -152,7 +157,7 @@ const Checkout = () => {
           <div className="grid grid-cols-1 gap-4">
             {cart.map((item) => (
               <div
-                key={item.product_id}
+                key={`${item.id}-${item.quantity}`} // Use id instead of product_id
                 className="flex items-center border rounded-lg p-4"
               >
                 {/* Product Image */}
@@ -179,19 +184,25 @@ const Checkout = () => {
                 {/* Quantity Controls */}
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() =>
-                      updateCartQuantity(item.product_id, item.quantity - 1)
-                    }
+                    onClick={() => {
+                      console.log(
+                        "Decreasing quantity for:",
+                        item.id,
+                        item.quantity - 1
+                      );
+                      updateCartQuantity(item.id, item.quantity - 1);
+                    }}
                     className="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center"
                   >
                     -
                   </button>
+
                   <input
                     type="number"
                     value={item.quantity}
                     onChange={(e) =>
                       updateCartQuantity(
-                        item.product_id,
+                        item.id,
                         Math.max(Number(e.target.value), 1)
                       )
                     }
@@ -199,7 +210,7 @@ const Checkout = () => {
                   />
                   <button
                     onClick={() =>
-                      updateCartQuantity(item.product_id, item.quantity + 1)
+                      updateCartQuantity(item.id, item.quantity + 1)
                     }
                     className="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center"
                   >
@@ -209,7 +220,7 @@ const Checkout = () => {
 
                 {/* Remove Button */}
                 <button
-                  onClick={() => removeFromCart(item.product_id)}
+                  onClick={() => removeFromCart(item.id)}
                   className="ml-4 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600"
                 >
                   <Trash2 size={16} />
