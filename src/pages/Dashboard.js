@@ -10,6 +10,7 @@ import ViewUsersModal from "./modals/ViewUsersModal";
 import AddProductModal from "./modals/AddProductModal";
 import ProductImageDisplay from "./modals/ProductImageDisplay";
 import EditProductModal from "./modals/EditProductModal";
+import FarmerOrdersModal from "./modals/FarmerOrdersModal";
 
 const Dashboard = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -25,6 +26,7 @@ const Dashboard = () => {
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+  const [isFarmerOrdersModalOpen, setIsFarmerOrdersModalOpen] = useState(false);
 
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const [buyerOrders, setBuyerOrders] = useState([]);
@@ -213,14 +215,7 @@ const Dashboard = () => {
           <h2>Farm Info</h2>
           <button
             onClick={() => setIsProfileModalOpen(true)}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#4CAF50",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
+            style={styles.manageProfileButton}
           >
             Manage Profile
           </button>
@@ -236,27 +231,24 @@ const Dashboard = () => {
         </p>
       </div>
       <div style={styles.card}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <div style={styles.productHeader}>
           <h2>Products</h2>
-          <button
-            onClick={() => setIsAddProductModalOpen(true)}
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#007bff",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            Add Product
-          </button>
+          <div style={styles.productActionButtons}>
+            <button
+              onClick={() => setIsAddProductModalOpen(true)}
+              style={styles.iconButton}
+              title="Add Product"
+            >
+              ➕
+            </button>
+            <button
+              onClick={() => setIsFarmerOrdersModalOpen(true)}
+              style={styles.iconButton}
+              title="View My Orders"
+            >
+              🛒
+            </button>
+          </div>
         </div>
         <div style={styles.productGrid}>
           {products.map((product) => (
@@ -328,6 +320,10 @@ const Dashboard = () => {
         onClose={() => setIsEditProductModalOpen(false)}
         product={selectedProduct}
         onProductUpdated={handleProductUpdated}
+      />
+      <FarmerOrdersModal
+        isOpen={isFarmerOrdersModalOpen}
+        onClose={() => setIsFarmerOrdersModalOpen(false)}
       />
     </>
   );
@@ -661,16 +657,20 @@ const styles = {
     marginLeft: "10px",
   },
   container: {
+    fontFamily: "'Inter', sans-serif", // Modern, clean font
+    backgroundColor: "#f4f6f9",
+    minHeight: "100vh",
     padding: "20px",
-    maxWidth: "800px",
-    margin: "auto",
+    display: "flex",
+    flexDirection: "column",
   },
   card: {
-    border: "1px solid #ddd",
-    borderRadius: "5px",
-    padding: "15px",
+    backgroundColor: "white",
+    borderRadius: "12px",
+    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    padding: "20px",
     marginBottom: "20px",
-    backgroundColor: "#f9f9f9",
+    transition: "all 0.3s ease",
   },
   productGrid: {
     display: "grid",
@@ -694,6 +694,39 @@ const styles = {
     marginBottom: "10px",
     borderRadius: "4px",
     overflow: "hidden",
+  },
+  productHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "15px",
+  },
+  productActionButtons: {
+    display: "flex",
+    gap: "10px",
+  },
+  iconButton: {
+    backgroundColor: "transparent",
+    border: "2px solid #4CAF50",
+    borderRadius: "50%",
+    width: "40px",
+    height: "40px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    cursor: "pointer",
+    transition: "background-color 0.3s ease",
+    fontSize: "18px",
+  },
+  manageProfileButton: {
+    padding: "8px 16px",
+    backgroundColor: "#4CAF50",
+    color: "#fff",
+    border: "none",
+    borderRadius: "20px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    transition: "background-color 0.3s ease",
   },
   productDetails: {
     marginTop: "10px",
