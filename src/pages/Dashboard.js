@@ -37,6 +37,12 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const userId = dashboardData?.data?.id;
+
+  const goToChatPage = () => {
+    navigate("/chat", { state: { userId } }); // Pass userId via state
+  };
+
   const handleProductAdded = (newProduct) => {
     setProducts((prevProducts) => [...prevProducts, newProduct]);
   };
@@ -588,6 +594,9 @@ const Dashboard = () => {
         <p>
           <strong>Email:</strong> {data.email}
         </p>
+        <button onClick={goToChatPage} style={styles.chatButton}>
+          Go to Chat
+        </button>
       </div>
 
       {dashboard === "Administrator Dashboard" &&
@@ -782,6 +791,16 @@ const styles = {
     cursor: "pointer",
     marginTop: "40px",
     float: "right",
+  },
+  chatButton: {
+    padding: "10px 20px",
+    backgroundColor: "#007BFF",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "16px",
+    marginTop: "10px",
   },
   errorContainer: {
     textAlign: "center",

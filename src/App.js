@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Shop from './pages/Shop';
 import Checkout from './pages/Checkout';
 import OrderConfirmation from './pages/OrderConfirmation';
+import ChatApp from './components/ChatApp';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/shop" element={<Shop />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
+        <Route path="/chat" element={<ChatApp />} />
       </Routes>
     </Router>
   );
