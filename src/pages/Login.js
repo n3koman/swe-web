@@ -21,7 +21,7 @@ const Login = () => {
       const response = await loginUser(email, password);
       if (response.status === 200) {
         localStorage.setItem('token', response.data.token); // Store JWT token
-        navigate('/shop'); // Redirect to shop
+        navigate('/dashboard'); // Redirect to shop
       }
     } catch (error) {
       console.error('Login error:', error);

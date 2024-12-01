@@ -26,6 +26,11 @@ const Dashboard = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
 
+  const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
+  const [buyerOrders, setBuyerOrders] = useState([]);
+  const [ordersError, setOrdersError] = useState("");
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -327,6 +332,28 @@ const Dashboard = () => {
     </>
   );
 
+  const fetchBuyerOrders = async () => {
+    setOrdersLoading(true);
+    setOrdersError("");
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        "https://swe-backend-livid.vercel.app/buyer/orders",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setBuyerOrders(response.data.orders);
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+      setOrdersError(error.response?.data?.error || "Failed to fetch orders");
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
   const renderBuyerDashboard = (data) => {
     const goToShop = () => {
       navigate("/shop");
@@ -345,28 +372,11 @@ const Dashboard = () => {
           <div style={{ display: "flex", gap: "10px" }}>
             <button
               onClick={() => setIsBuyerProfileModalOpen(true)}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#4CAF50",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
+              style={styles.profileButton}
             >
               Manage Profile
             </button>
-            <button
-              onClick={goToShop}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#007bff",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={goToShop} style={styles.shopButton}>
               Go to Shop
             </button>
           </div>
@@ -374,6 +384,47 @@ const Dashboard = () => {
         <p>
           <strong>Delivery Address:</strong> {data.delivery_address}
         </p>
+
+        <div style={styles.card}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "15px",
+            }}
+          >
+            <h2>My Orders</h2>
+            <button
+              onClick={() => {
+                fetchBuyerOrders();
+                setIsOrdersModalOpen(true);
+              }}
+              style={styles.viewOrdersButton}
+            >
+              View All Orders
+            </button>
+          </div>
+          {/* Display recent orders preview */}
+          <div style={styles.recentOrdersPreview}>
+            {buyerOrders.slice(0, 3).map((order) => (
+              <div key={order.id} style={styles.orderPreviewCard}>
+                <div style={styles.orderPreviewHeader}>
+                  <span style={styles.orderPreviewId}>Order #{order.id}</span>
+                  <span style={styles.orderPreviewStatus(order.status)}>
+                    {order.status}
+                  </span>
+                </div>
+                <div style={styles.orderPreviewDetails}>
+                  <p>Total: ${order.total_price.toFixed(2)}</p>
+                  <p>
+                    Created: {new Date(order.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <BuyerProfileModal
           isOpen={isBuyerProfileModalOpen}
@@ -385,10 +436,134 @@ const Dashboard = () => {
             delivery_address: data.delivery_address || "",
           }}
         />
+
+        {isOrdersModalOpen && (
+          <div
+            className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${
+              isOrdersModalOpen ? "opacity-100" : "opacity-0"
+            }`}
+            onClick={() => setIsOrdersModalOpen(false)}
+          >
+            <div
+              className={`relative bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto transform transition-transform duration-300 ${
+                isOrdersModalOpen ? "scale-100" : "scale-90"
+              }`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="absolute top-3 right-3 flex space-x-2 z-50">
+                <button
+                  className="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-green-700"
+                  onClick={fetchBuyerOrders}
+                  title="Refresh Orders"
+                >
+                  🔄
+                </button>
+                <button
+                  onClick={() => setIsOrdersModalOpen(false)}
+                  className="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-red-700"
+                  title="Close"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-6">
+                <h2 className="text-2xl font-semibold mb-4">My Orders</h2>
+
+                {ordersError && (
+                  <div className="bg-red-100 text-red-800 p-3 rounded mb-4">
+                    {ordersError}
+                  </div>
+                )}
+
+                {ordersLoading ? (
+                  <p>Loading orders...</p>
+                ) : buyerOrders.length === 0 ? (
+                  <p>No orders found.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {buyerOrders.map((order) => (
+                      <div
+                        key={order.id}
+                        className="p-4 border border-gray-200 rounded bg-gray-50 shadow-md"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-bold text-lg">
+                            Order #{order.id}
+                          </span>
+                          <span
+                            className={`px-2 py-1 rounded text-sm font-semibold ${
+                              order.status === "completed"
+                                ? "bg-green-200 text-green-800"
+                                : order.status === "pending"
+                                ? "bg-yellow-200 text-yellow-800"
+                                : "bg-red-200 text-red-800"
+                            }`}
+                          >
+                            {order.status}
+                          </span>
+                        </div>
+                        <div className="mb-2">
+                          <strong>Total Price:</strong> $
+                          {order.total_price.toFixed(2)}
+                        </div>
+                        <div className="mb-2">
+                          <strong>Created At:</strong>{" "}
+                          {new Date(order.created_at).toLocaleString()}
+                        </div>
+                        {order.order_items && (
+                          <div>
+                            <strong>Order Items:</strong>
+                            <ul className="list-disc list-inside">
+                              {order.order_items.map((item) => (
+                                <li key={item.id}>
+                                  {item.product_name} - Qty: {item.quantity} - $
+                                  {item.total_price.toFixed(2)}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {order.delivery && (
+                          <div className="mt-2">
+                            <strong>Delivery Details:</strong>
+                            <p>Method: {order.delivery.delivery_method}</p>
+                            {order.delivery.tracking_number && (
+                              <p>
+                                Tracking #: {order.delivery.tracking_number}
+                              </p>
+                            )}
+                            {order.delivery.estimated_delivery_date && (
+                              <p>
+                                Estimated Delivery:{" "}
+                                {new Date(
+                                  order.delivery.estimated_delivery_date
+                                ).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={() => setIsOrdersModalOpen(false)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
-  
+
   if (error) {
     return (
       <div style={styles.errorContainer}>
@@ -588,6 +763,66 @@ const styles = {
     fontSize: "18px",
     color: "#555",
     marginTop: "50px",
+  },
+  profileButton: {
+    padding: "8px 16px",
+    backgroundColor: "#4CAF50",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  shopButton: {
+    padding: "8px 16px",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  viewOrdersButton: {
+    padding: "8px 16px",
+    backgroundColor: "#6c757d",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  recentOrdersPreview: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "10px",
+  },
+  orderPreviewCard: {
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    padding: "10px",
+    backgroundColor: "#f9f9f9",
+  },
+  orderPreviewHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "5px",
+  },
+  orderPreviewId: {
+    fontWeight: "bold",
+    fontSize: "14px",
+  },
+  orderPreviewStatus: (status) => ({
+    padding: "2px 6px",
+    borderRadius: "4px",
+    fontSize: "12px",
+    fontWeight: "bold",
+    backgroundColor:
+      status === "completed"
+        ? "#4CAF50"
+        : status === "pending"
+        ? "#FFC107"
+        : "#F44336",
+    color: "white",
+  }),
+  orderPreviewDetails: {
+    fontSize: "12px",
   },
 };
 
