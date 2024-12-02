@@ -62,22 +62,33 @@ const ChatPage = () => {
   }, [userType, token]);
 
   // Fetch messages for a specific chat
-  const fetchMessages = async (chatId) => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get(
-        `${baseUrl}/${userType}/chats/${chatId}/messages`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setMessages(response.data.messages);
-      setSelectedChat(chatId);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      setError("Failed to load messages");
-      setIsLoading(false);
+  const fetchMessages = useCallback(
+    async (chatId) => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get(
+          `${baseUrl}/${userType}/chats/${chatId}/messages`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setMessages(response.data.messages);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        setError("Failed to load messages");
+        setIsLoading(false);
+      }
+    },
+    [userType, token]
+  );
+
+  useEffect(() => {
+    let interval;
+    if (selectedChat) {
+      // Set an interval to fetch new messages periodically
+      interval = setInterval(() => fetchMessages(selectedChat), 3000); // 3 seconds
     }
-  };
+    return () => clearInterval(interval); // Cleanup on unmount or when selectedChat changes
+  }, [selectedChat, fetchMessages]);
 
   // Send a message
   const sendMessage = async () => {
