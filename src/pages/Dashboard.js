@@ -104,7 +104,6 @@ const Dashboard = () => {
       console.error("User ID is not set.");
     }
   };
-  
 
   const handleEditUser = (user) => {
     setSelectedUser(user); // Set the user to edit
@@ -233,6 +232,9 @@ const Dashboard = () => {
             style={styles.manageProfileButton}
           >
             Manage Profile
+          </button>
+          <button onClick={goToChat} style={styles.chatButton}>
+            Go to Chat
           </button>
         </div>
         <p>
@@ -390,6 +392,9 @@ const Dashboard = () => {
             <button onClick={goToShop} style={styles.shopButton}>
               Go to Shop
             </button>
+            <button onClick={goToChat} style={styles.chatButton}>
+              Go to Chat
+            </button>
           </div>
         </div>
         <p>
@@ -436,7 +441,6 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-        <button onClick={goToChat}>Go to Chat</button>
         <BuyerProfileModal
           isOpen={isBuyerProfileModalOpen}
           onClose={() => setIsBuyerProfileModalOpen(false)}
@@ -734,6 +738,16 @@ const styles = {
     fontSize: "18px",
   },
   manageProfileButton: {
+    padding: "8px 16px",
+    backgroundColor: "#4CAF50",
+    color: "#fff",
+    border: "none",
+    borderRadius: "20px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    transition: "background-color 0.3s ease",
+  },
+  manageProButton: {
     padding: "8px 16px",
     backgroundColor: "#4CAF50",
     color: "#fff",
