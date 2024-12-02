@@ -61,7 +61,7 @@ const ChatPage = () => {
     }
   }, [userType, token]);
 
-  // Fetch messages for a specific chat
+  // Fetch message for a specific chat
   const fetchMessages = async (chatId) => {
     try {
       setIsLoading(true);
