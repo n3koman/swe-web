@@ -35,13 +35,8 @@ const Dashboard = () => {
 
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState("");
+  const [userID, setUserID] = useState(null);
   const navigate = useNavigate();
-
-  const userId = dashboardData?.data?.id;
-
-  const goToChatPage = () => {
-    navigate("/chat", { state: { userId } }); // Pass userId via state
-  };
 
   const handleProductAdded = (newProduct) => {
     setProducts((prevProducts) => [...prevProducts, newProduct]);
@@ -57,11 +52,13 @@ const Dashboard = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token"); // Fetch the JWT token from local storage
+    const savedUserID = localStorage.getItem("userID");
 
     if (!token) {
       navigate("/login"); // Redirect to login if no token is found
       return;
     }
+    setUserID(savedUserID);
 
     // Fetch the dashboard data
     const fetchDashboard = async () => {
@@ -89,14 +86,26 @@ const Dashboard = () => {
         }
       }
     };
-
     fetchDashboard();
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token"); // Remove the JWT token from local storage
+    localStorage.removeItem("userID");
     navigate("/login"); // Redirect to login page
   };
+
+  const goToChat = () => {
+    const userIDToUse = userID || localStorage.getItem("userID");
+
+    if (userIDToUse) {
+      navigate(`/chat/${userIDToUse}`);
+    } else {
+      console.error("User ID is not set.");
+    }
+  };
+  
+
   const handleEditUser = (user) => {
     setSelectedUser(user); // Set the user to edit
     setIsEditUserModalOpen(true); // Open the modal
@@ -302,7 +311,7 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
-
+      <button onClick={goToChat}>Go to Chat</button>
       <FarmerProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
@@ -427,7 +436,7 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-
+        <button onClick={goToChat}>Go to Chat</button>
         <BuyerProfileModal
           isOpen={isBuyerProfileModalOpen}
           onClose={() => setIsBuyerProfileModalOpen(false)}
@@ -594,9 +603,6 @@ const Dashboard = () => {
         <p>
           <strong>Email:</strong> {data.email}
         </p>
-        <button onClick={goToChatPage} style={styles.chatButton}>
-          Go to Chat
-        </button>
       </div>
 
       {dashboard === "Administrator Dashboard" &&
@@ -794,13 +800,15 @@ const styles = {
   },
   chatButton: {
     padding: "10px 20px",
-    backgroundColor: "#007BFF",
-    color: "#fff",
+    backgroundColor: "#007bff",
+    color: "#ffffff",
     border: "none",
     borderRadius: "5px",
-    cursor: "pointer",
     fontSize: "16px",
-    marginTop: "10px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    textAlign: "center",
+    marginTop: "20px",
   },
   errorContainer: {
     textAlign: "center",
