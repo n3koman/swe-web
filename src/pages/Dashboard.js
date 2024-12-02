@@ -147,47 +147,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleGenerateReport = async (type, format = "csv", role) => {
-    const token = localStorage.getItem("token");
-    const endpoint =
-      role === "farmer"
-        ? type === "sales"
-          ? "/farmer/report/sales"
-          : "/farmer/report/inventory"
-        : "/buyer/report/purchases";
-
-    const data = {
-      start_date: "2024-01-01", // Replace with dynamic date picker values if needed
-      end_date: "2024-12-31", // Replace with dynamic date picker values if needed
-      format,
-    };
-
-    try {
-      const response = await axios.post(
-        `https://swe-backend-livid.vercel.app${endpoint}`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          responseType: "blob", // To handle file downloads
-        }
-      );
-
-      // Create a download link and trigger the download
-      const blob = new Blob([response.data], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${type}_report.${format}`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Error generating report:", error);
-      alert("Failed to generate report. Please try again.");
-    }
-  };
-
   const renderAdministratorDashboard = (data) => {
     return (
       <div style={styles.adminContainer}>
@@ -288,27 +247,6 @@ const Dashboard = () => {
           <strong>Crops:</strong> {data.crops.join(", ")}
         </p>
       </div>
-
-      <div style={styles.card}>
-        <div style={styles.productHeader}>
-          <h2>Reports</h2>
-        </div>
-        <div style={styles.buttonContainer}>
-          <button
-            onClick={() => handleGenerateReport("sales", "csv", "farmer")}
-            style={styles.reportButton}
-          >
-            Generate Sales Report
-          </button>
-          <button
-            onClick={() => handleGenerateReport("inventory", "csv", "farmer")}
-            style={styles.reportButton}
-          >
-            Generate Inventory Report
-          </button>
-        </div>
-      </div>
-
       <div style={styles.card}>
         <div style={styles.productHeader}>
           <h2>Products</h2>
@@ -375,6 +313,7 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
+      <button onClick={goToChat}>Go to Chat</button>
       <FarmerProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
@@ -461,17 +400,7 @@ const Dashboard = () => {
         <p>
           <strong>Delivery Address:</strong> {data.delivery_address}
         </p>
-        <div style={styles.card}>
-          <div style={styles.productHeader}>
-            <h2>Reports</h2>
-          </div>
-          <button
-            onClick={() => handleGenerateReport("purchases", "csv", "buyer")}
-            style={styles.reportButton}
-          >
-            Generate Purchase Report
-          </button>
-        </div>
+
         <div style={styles.card}>
           <div
             style={{
@@ -721,18 +650,6 @@ const styles = {
     cursor: "pointer",
     textAlign: "left",
   },
-  reportButton: {
-    padding: "8px 16px",
-    backgroundColor: "#FFA500", // Orange color
-    color: "#fff",
-    border: "none",
-    borderRadius: "20px",
-    cursor: "pointer",
-    fontWeight: "bold",
-    transition: "background-color 0.3s ease",
-    margin: "5px 0",
-  },
-
   detailContainer: {
     marginTop: "10px",
     padding: "15px",
