@@ -65,11 +65,13 @@ const ChatPage = () => {
   const fetchMessages = useCallback(
     async (chatId) => {
       try {
+        console.log(`Fetching messages for chat ID: ${chatId}`); // Debugging
         setIsLoading(true);
         const response = await axios.get(
           `${baseUrl}/${userType}/chats/${chatId}/messages`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        console.log("Fetched messages:", response.data.messages); // Debugging
         setMessages(response.data.messages);
         setIsLoading(false);
       } catch (error) {
@@ -84,10 +86,14 @@ const ChatPage = () => {
   useEffect(() => {
     let interval;
     if (selectedChat) {
-      // Set an interval to fetch new messages periodically
-      interval = setInterval(() => fetchMessages(selectedChat), 3000); // 3 seconds
+      interval = setInterval(() => {
+        console.log(`Polling messages for chat ID: ${selectedChat}`); // Debugging
+        fetchMessages(selectedChat);
+      }, 3000); // 3 seconds
+    } else {
+      console.warn("No chat selected for polling."); // Debugging
     }
-    return () => clearInterval(interval); // Cleanup on unmount or when selectedChat changes
+    return () => clearInterval(interval); // Cleanup
   }, [selectedChat, fetchMessages]);
 
   // Send a message
@@ -232,6 +238,14 @@ const ChatPage = () => {
             </div>
           ))
         )}
+      </div>
+      <div>
+        <button
+          onClick={() => fetchMessages(selectedChat)}
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+        >
+          Refresh Messages
+        </button>
       </div>
 
       {/* Chat Area */}
