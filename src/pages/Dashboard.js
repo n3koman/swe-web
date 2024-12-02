@@ -11,7 +11,6 @@ import AddProductModal from "./modals/AddProductModal";
 import ProductImageDisplay from "./modals/ProductImageDisplay";
 import EditProductModal from "./modals/EditProductModal";
 import FarmerOrdersModal from "./modals/FarmerOrdersModal";
-import ReportModal from "./modals/ReportModal";
 
 const Dashboard = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -24,7 +23,6 @@ const Dashboard = () => {
   const [hoveredProductId, setHoveredProductId] = useState(null);
   const [isEditProductModalOpen, setIsEditProductModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null); // To store the currently selected product for editing
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
@@ -276,12 +274,6 @@ const Dashboard = () => {
           >
             Manage Profile
           </button>
-          <button
-            onClick={() => setIsReportModalOpen(true)}
-            style={styles.reportButton}
-          >
-            Generate Report
-          </button>
           <button onClick={goToChat} style={styles.chatButton}>
             Go to Chat
           </button>
@@ -383,10 +375,6 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
-      <ReportModal
-        isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
-      />
       <FarmerProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
