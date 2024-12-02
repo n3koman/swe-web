@@ -10,6 +10,157 @@ body {
   text-align: center;
 }
 
+.floating-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  z-index: 100;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  margin-left: 225px;
+}
+
+.logo-section img {
+  height: 30px;
+  margin-right: 10px;
+}
+
+.logo-img {
+  height: 10px;
+}
+
+.links-section {
+  display: flex;
+  gap: 30px;
+}
+
+.links-section .link {
+  text-decoration: none;
+  color: #333;
+}
+
+.links-section .link:hover {
+  color: #000;
+}
+
+.user-section {
+  display: flex;
+  gap: 10px;
+  margin-right: 225px;
+}
+
+.login-container {
+  position: relative;
+  display: flex;
+}
+
+.login-popup {
+  position: absolute;
+  top: 115%;
+  right: -140%;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 200;
+  min-width: 300px;
+}
+
+.login-popup h2 {
+  margin-top: 0;
+}
+
+.login-popup .error {
+  color: red;
+  font-size: 14px;
+}
+
+.login-popup .login-input {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.login-popup .login-button {
+  padding: 10px 23px;
+  background-color: #007BFF;
+  color: white;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.login-popup .cancel-button {
+  padding: 10px 20px;
+  background-color: #FF4B4B;
+  font-size: 16px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.login-btn, .signup-btn {
+  background-color: #28a745;
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  padding: 10px 20px; /* Adjust padding */
+  transition: background-color 0.3s;
+}
+
+.login-btn:hover, .signup-btn:hover {
+  background-color: #218838;
+}
+
+.dashboard-btn {
+  background-color: #007BFF;
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  padding: 10px 20px; /* Adjust padding */
+  transition: background-color 0.3s;
+}
+
+.dashboard-btn:hover {
+  background-color: #005aba;
+}
+
+.logout-btn {
+  background-color: #FF4B4B;
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  padding: 10px 20px; /* Adjust padding */
+  transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+  background-color: #cc3c3c;
+}
+
+.logout-btn {
+  margin-left: 10px;
+}
+
 .hero-section {
   background-image: url('/src/images/farm-background.jpg');
   background-size: cover;
@@ -121,6 +272,7 @@ h2 {
   flex-wrap: wrap;
   max-width: 900px;
   margin: 0 auto;
+  gap: 20px;
 }
 
 .step {

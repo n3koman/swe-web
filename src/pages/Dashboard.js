@@ -227,15 +227,17 @@ const Dashboard = () => {
           }}
         >
           <h2>Farm Info</h2>
-          <button
-            onClick={() => setIsProfileModalOpen(true)}
-            style={styles.manageProfileButton}
-          >
-            Manage Profile
-          </button>
-          <button onClick={goToChat} style={styles.chatButton}>
-            Go to Chat
-          </button>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              onClick={() => setIsProfileModalOpen(true)}
+              style={styles.manageProfileButton}
+            >
+              Manage Profile
+            </button>
+            <button onClick={goToChat} style={styles.chatButton}>
+              Go to Chat
+            </button>
+          </div>
         </div>
         <p>
           <strong>Farm Address:</strong> {data.farm_address}
@@ -313,7 +315,6 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
-      <button onClick={goToChat}>Go to Chat</button>
       <FarmerProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
@@ -401,7 +402,7 @@ const Dashboard = () => {
           <strong>Delivery Address:</strong> {data.delivery_address}
         </p>
 
-        <div style={styles.card}>
+        <div style={styles.myOrdersCard}>
           <div
             style={{
               display: "flex",
@@ -595,10 +596,12 @@ const Dashboard = () => {
 
   return (
     <div style={styles.container}>
-      <button onClick={handleLogout} style={styles.logoutButton}>
-        Logout
-      </button>
-      <h2>{dashboard}</h2>
+      <div style={styles.header}>
+        <h2>{dashboard}</h2>
+        <button onClick={handleLogout} style={styles.logoutButton}>
+          Logout
+        </button>
+      </div>
       <div style={styles.card}>
         <h2>User Info</h2>
         <p>
@@ -620,8 +623,7 @@ const Dashboard = () => {
 // Inline styles
 const styles = {
   adminContainer: {
-    margin: "20px auto",
-    maxWidth: "900px",
+    margin: "20px",
     padding: "20px",
     backgroundColor: "#f7f9fc",
     borderRadius: "8px",
@@ -678,10 +680,25 @@ const styles = {
   container: {
     fontFamily: "'Inter', sans-serif", // Modern, clean font
     backgroundColor: "#f4f6f9",
-    minHeight: "100vh",
+    minHeight: "100vh", 
     padding: "20px",
     display: "flex",
     flexDirection: "column",
+  },
+  header: {
+    display: 'flex', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    padding: '10px', 
+  },
+  myOrdersCard: {
+    backgroundColor: "white",
+    borderRadius: "12px",
+    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    padding: "20px",
+    marginTop: "20px",
+    marginBottom: "20px",
+    transition: "all 0.3s ease",
   },
   card: {
     backgroundColor: "white",
@@ -742,9 +759,8 @@ const styles = {
     backgroundColor: "#4CAF50",
     color: "#fff",
     border: "none",
-    borderRadius: "20px",
+    borderRadius: "5px",
     cursor: "pointer",
-    fontWeight: "bold",
     transition: "background-color 0.3s ease",
   },
   manageProButton: {
@@ -819,10 +835,8 @@ const styles = {
     border: "none",
     borderRadius: "5px",
     fontSize: "16px",
-    fontWeight: "bold",
     cursor: "pointer",
     textAlign: "center",
-    marginTop: "20px",
   },
   errorContainer: {
     textAlign: "center",
