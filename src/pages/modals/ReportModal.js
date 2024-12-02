@@ -14,7 +14,7 @@ const ReportModal = ({ isOpen, onClose }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        `https://swe-backend-livid.vercel.app/farmer/report`,
+        `https://swe-backend-livid.vercel.app/reports/farmer/report`,
         {
           report_type: reportType,
           date_range: [dateRange.start, dateRange.end],
