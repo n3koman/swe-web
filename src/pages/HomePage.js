@@ -4,6 +4,10 @@ import { loginUser } from '../apiService';
 import { Link } from 'react-router-dom';
 import './HomePage.css';
 import logo from '../images/logo.png';
+import cabbage from '../images/cabbage.jpg';
+import strawberry from '../images/strawberry.jpg';
+import watermelon from '../images/watermelon.jpg';
+import onion from '../images/onion.jpg';
 import { jwtDecode } from "jwt-decode";
 
 const HomePage = () => {
@@ -53,7 +57,6 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
-      
 
 
       <header className="floating-panel">
@@ -70,7 +73,7 @@ const HomePage = () => {
             </div>
 
             <nav className="links-section">
-              <a href="#">Home</a>
+              <a href="#hero">Home</a>
               <a href='#products'>Products</a>
               <a href='#categories'>Categories</a>
               <a href='#howitworks'>How it Works</a>
@@ -131,7 +134,7 @@ const HomePage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="hero-section">
+      <section className="hero-section" id='hero'>
         <div className="hero-content">
           <h1>Farm Fresh to Your Doorstep</h1>
           <p>Connecting farmers and buyers directly. Get fresh, organic produce, seeds, and equipment effortlessly.</p>
@@ -141,12 +144,28 @@ const HomePage = () => {
 
       {/* Featured Products Section */}
       <section className="featured-products-section" id='products'>
-        <h2>Our Top Picks</h2>
+        <h2>Fresh Products</h2>
         <div className="product-grid">
-          <div className="product-card">Product 1</div>
-          <div className="product-card">Product 2</div>
-          <div className="product-card">Product 3</div>
-          <div className="product-card">Product 4</div>
+          <div className="product-card">
+            <div style={styles.prodimg}>
+              <img src={strawberry} alt="strawberry" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px"}}/>
+            </div>
+          </div>
+          <div className="product-card">
+            <div style={styles.prodimg}>
+              <img src={watermelon} alt="watermelon" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px"}}/>
+            </div>
+          </div>
+          <div className="product-card">
+            <div style={styles.prodimg}>
+              <img src={cabbage} alt="cabbage" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px"}}/>
+            </div>
+          </div>
+          <div className="product-card">
+            <div style={styles.prodimg}>
+              <img src={onion} alt="onion" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "8px"}}/>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -157,7 +176,8 @@ const HomePage = () => {
           <div className="category-card">Vegetables</div>
           <div className="category-card">Fruits</div>
           <div className="category-card">Seeds</div>
-          <div className="category-card">Equipment</div>
+          <div className="category-card">Grains</div>
+          <div className="category-card">Dairy Products</div>
         </div>
       </section>
 
@@ -197,6 +217,19 @@ const HomePage = () => {
       </section>
     </div>
   );
+};
+
+const styles = {
+  prodimg: {
+    position: "relative",
+    width: "150px",
+    height: "150px",
+    overflow: "hidden",
+    borderRadius: "8px",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    margin: "10px",
+    cursor: "pointer",
+  },
 };
 
 export default HomePage;

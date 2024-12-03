@@ -116,18 +116,21 @@ body {
   cursor: pointer;
 }
 
-.login-btn, .signup-btn {
+.login-btn,
+.signup-btn {
   background-color: #28a745;
   color: white;
   text-decoration: none;
   font-size: 1rem;
   border-radius: 5px;
   transition: background-color 0.3s;
-  padding: 10px 20px; /* Adjust padding */
+  padding: 10px 20px;
+  /* Adjust padding */
   transition: background-color 0.3s;
 }
 
-.login-btn:hover, .signup-btn:hover {
+.login-btn:hover,
+.signup-btn:hover {
   background-color: #218838;
 }
 
@@ -138,7 +141,8 @@ body {
   font-size: 1rem;
   border-radius: 5px;
   transition: background-color 0.3s;
-  padding: 10px 20px; /* Adjust padding */
+  padding: 10px 20px;
+  /* Adjust padding */
   transition: background-color 0.3s;
 }
 
@@ -153,7 +157,8 @@ body {
   font-size: 1rem;
   border-radius: 5px;
   transition: background-color 0.3s;
-  padding: 10px 20px; /* Adjust padding */
+  padding: 10px 20px;
+  /* Adjust padding */
   transition: background-color 0.3s;
 }
 
@@ -331,6 +336,7 @@ h2 {
 }
 
 @media (max-width: 768px) {
+
   .steps,
   .product-grid,
   .categories,
