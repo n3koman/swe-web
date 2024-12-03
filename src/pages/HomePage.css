@@ -1,5 +1,9 @@
 /* HomePage.css */
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   font-family: 'Arial', sans-serif;
@@ -27,7 +31,7 @@ body {
 .logo-section {
   display: flex;
   align-items: center;
-  margin-left: 225px;
+  margin-left: 14rem;
 }
 
 .logo-section img {
@@ -56,7 +60,7 @@ body {
 .user-section {
   display: flex;
   gap: 10px;
-  margin-right: 225px;
+  margin-right: 14rem;
 }
 
 .login-container {
@@ -165,8 +169,7 @@ body {
   background-image: url('/src/images/farm-background.jpg');
   background-size: cover;
   background-position: center;
-  padding: 100px 20px;
-  color: white;
+  padding: 160px 20px;
   display: flex;
   align-items: center;
   justify-content: center;

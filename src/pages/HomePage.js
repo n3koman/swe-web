@@ -4,6 +4,7 @@ import { loginUser } from '../apiService';
 import { Link } from 'react-router-dom';
 import './HomePage.css';
 import logo from '../images/logo.png';
+import { jwtDecode } from "jwt-decode";
 
 const HomePage = () => {
 
@@ -27,6 +28,13 @@ const HomePage = () => {
         localStorage.setItem('token', response.data.token); // Store JWT token
         setIsLoggedIn(true);
         setShowLoginPopup(false);
+        
+        const decodedToken = jwtDecode(response.data.token);
+        console.log("Decoded token payload:", decodedToken); // Debugging print to log the decoded token payload
+
+        const userID = decodedToken.user_id; // Use user_id from the payload
+        console.log("User ID:", userID);
+        localStorage.setItem("userID", userID);
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -39,7 +47,6 @@ const HomePage = () => {
   };
 
   const handleLogout = () => {
-    // Perform logout logic here
     localStorage.removeItem('token');
     setIsLoggedIn(false);
   };
@@ -63,12 +70,11 @@ const HomePage = () => {
             </div>
 
             <nav className="links-section">
-              <Link to="/">Home</Link>
-              <Link to="/features">Features</Link>
-              <Link to="/products">Products</Link>
-              <Link to="/categories">Categories</Link>
-              <Link to="/review">Review</Link>
-              <Link to="/blogs">Blogs</Link>
+              <a href="#">Home</a>
+              <a href='#products'>Products</a>
+              <a href='#categories'>Categories</a>
+              <a href='#howitworks'>How it Works</a>
+              <a href='#reviews'>Reviews</a>
             </nav>
 
             <div className="user-section">
@@ -134,7 +140,7 @@ const HomePage = () => {
       </section>
 
       {/* Featured Products Section */}
-      <section className="featured-products-section">
+      <section className="featured-products-section" id='products'>
         <h2>Our Top Picks</h2>
         <div className="product-grid">
           <div className="product-card">Product 1</div>
@@ -145,7 +151,7 @@ const HomePage = () => {
       </section>
 
       {/* Categories Section */}
-      <section className="categories-section">
+      <section className="categories-section" id='categories'>
         <h2>Explore by Category</h2>
         <div className="categories">
           <div className="category-card">Vegetables</div>
@@ -156,7 +162,7 @@ const HomePage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="how-it-works-section">
+      <section className="how-it-works-section" id='howitworks'>
         <h2>How It Works</h2>
         <div className="steps">
           <div className="step">
@@ -175,7 +181,7 @@ const HomePage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="testimonials-section">
+      <section className="testimonials-section" id='reviews'>
         <h2>What Our Users Say</h2>
         <div className="testimonials">
           <div className="testimonial">"Incredibly fresh produce! The quality is unbeatable."</div>
